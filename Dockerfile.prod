@@ -1,0 +1,14 @@
+FROM amazoncorretto:11.0.18-alpine
+
+ARG WAR_FILE = ./build/libs/oldspringapps-0.0.1-SNAPSHOT-plain.war
+
+## build model number 1 ##
+# FROM node:18-alpine as builder
+# WORKDIR '/app'
+# COPY package.json .
+# RUN npm install
+# COPY . .
+# RUN npm run build
+#
+# FROM nginx
+# COPY --from=builder /app/build /usr/share/nginx/html
