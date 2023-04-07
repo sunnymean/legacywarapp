@@ -1,14 +1,27 @@
-FROM amazoncorretto:11.0.18-alpine
+#FROM amazoncorretto:11.0.18-al2023 as builder
+FROM openjdk:11-slim as BUILD_IMAGE
 
-ARG WAR_FILE = ./build/libs/oldspringapps-0.0.1-SNAPSHOT-plain.war
+# 변수 사용
+ENV APP_HOME=/usr/app/
 
-## build model number 1 ##
-# FROM node:18-alpine as builder
-# WORKDIR '/app'
-# COPY package.json .
-# RUN npm install
-# COPY . .
-# RUN npm run build
-#
-# FROM nginx
-# COPY --from=builder /app/build /usr/share/nginx/html
+# 작업 폴더 위치 설정
+WORKDIR $APP_HOME
+
+# 실행시 필수 파일 복사
+COPY gradlew $APP_HOME
+COPY build.gradle $APP_HOME
+#COPY settings.gradle $APP_HOME
+COPY gradle $APP_HOME/gradle
+
+RUN ./gradlew -x test build || return 0
+COPY src src
+RUN ./gradlew war
+
+FROM tomcat:9.0.73-jdk11-corretto-al2
+
+ENV APP_HOME=/usr/app/
+WORKDIR $APP_HOME
+
+COPY --from=BUILD_IMAGE $APP_HOME/build/libs/app-0.0.1-SNAPSHOT-plain.war /usr/local/tomcat/webapps/ROOT.war
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
