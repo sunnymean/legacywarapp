@@ -2,7 +2,10 @@ version: '3'
 
 services:
   legacyapps:
-    build: .
+#    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     image: oldspringapps-img
     ports:
       - "8080:8080"
